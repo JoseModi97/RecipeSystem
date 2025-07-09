@@ -14,6 +14,22 @@ body {
 
 /* Add any additional UIkit specific overrides or new custom styles below if needed. */
 
+/* Modal Body Scrolling */
+.uk-modal-body {
+    max-height: 70vh; /* Adjust as needed, e.g., 60vh or 75vh */
+    overflow-y: auto;
+}
+
+/* Optional: Ensure modal footers have a bit of padding if not default by theme/structure */
+/* UIkit's .uk-modal-footer usually has padding, but this can be used if needed. */
+/*
+.uk-modal-footer {
+    padding-top: 15px;
+    border-top: 1px solid #e5e5e5;
+}
+*/
+
+
 /* Example: If you want to customize UIkit's primary button further */
 /*
 .uk-button-primary {
