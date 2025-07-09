@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Explorer</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Recipe Explorer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="d-flex ms-auto" id="searchForm">
+                    <input class="form-control me-2" type="search" placeholder="Search recipes..." aria-label="Search" id="searchInput">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="tagFilterDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Filter by Tag
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="tagFilterDropdown" id="tagFilterOptions">
+                            <!-- Tag options will be populated here -->
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="mealTypeFilterDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Filter by Meal Type
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="mealTypeFilterDropdown" id="mealTypeFilterOptions">
+                            <!-- Meal type options will be populated here -->
+                        </ul>
+                    </li>
+                     <li class="nav-item">
+                        <button class="btn btn-primary ms-2" id="addRecipeBtn" data-bs-toggle="modal" data-bs-target="#addEditRecipeModal">Add Recipe</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="container mt-4">
+        <!-- Sorting Controls -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="sortBySelect" class="form-label">Sort By:</label>
+                <select class="form-select" id="sortBySelect">
+                    <option value="name">Name</option>
+                    <option value="rating">Rating</option>
+                    <option value="caloriesPerServing">Calories</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="sortOrderSelect" class="form-label">Order:</label>
+                <select class="form-select" id="sortOrderSelect">
+                    <option value="asc">Ascending</option>
+                    <option value="desc">Descending</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Recipe Cards Grid -->
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="recipeCardGrid">
+            <!-- Recipe cards will be populated here -->
+        </div>
+
+        <!-- Pagination Controls -->
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center" id="paginationControls">
+                <!-- Pagination items will be populated here -->
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Recipe Detail Modal -->
+    <div class="modal fade" id="recipeDetailModal" tabindex="-1" aria-labelledby="recipeDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recipeDetailModalLabel">Recipe Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="recipeDetailModalBody">
+                    <!-- Recipe details will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-warning" id="editRecipeModalBtn">Edit</button>
+                    <button type="button" class="btn btn-danger" id="deleteRecipeModalBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Recipe Modal -->
+    <div class="modal fade" id="addEditRecipeModal" tabindex="-1" aria-labelledby="addEditRecipeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEditRecipeModalLabel">Add Recipe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addEditRecipeForm">
+                        <input type="hidden" id="recipeId">
+                        <div class="mb-3">
+                            <label for="recipeName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="recipeName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeIngredients" class="form-label">Ingredients (comma-separated)</label>
+                            <textarea class="form-control" id="recipeIngredients" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeInstructions" class="form-label">Instructions (semicolon-separated steps)</label>
+                            <textarea class="form-control" id="recipeInstructions" rows="5" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeImage" class="form-label">Image URL</label>
+                            <input type="url" class="form-control" id="recipeImage">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="recipePrepTime" class="form-label">Prep Time (minutes)</label>
+                                <input type="number" class="form-control" id="recipePrepTime" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="recipeCookTime" class="form-label">Cook Time (minutes)</label>
+                                <input type="number" class="form-control" id="recipeCookTime" min="0">
+                            </div>
+                        </div>
+                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="recipeCuisine" class="form-label">Cuisine</label>
+                                <input type="text" class="form-control" id="recipeCuisine">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="recipeDifficulty" class="form-label">Difficulty</label>
+                                <select class="form-select" id="recipeDifficulty">
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeTags" class="form-label">Tags (comma-separated)</label>
+                            <input type="text" class="form-control" id="recipeTags">
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeMealType" class="form-label">Meal Type (comma-separated)</label>
+                            <input type="text" class="form-control" id="recipeMealType">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Recipe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <!-- Toasts will be appended here -->
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="modal fade" id="loadingSpinnerModal" tabindex="-1" aria-labelledby="loadingSpinnerModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: transparent; border: none;">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
