@@ -4,93 +4,65 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipe Explorer</title>
-    <!-- UIkit CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/css/uikit.min.css" />
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
-    <!-- UIkit Icons (if needed, or use SVG icons directly) -->
-    <!-- Note: UIkit has its own icon system. We'll adapt or add a specific icon library if the default isn't sufficient. -->
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
 </head>
 <body>
     <!-- Navigation Bar -->
-    <nav class="uk-navbar-container uk-navbar-sticky" uk-navbar>
-        <div class="uk-navbar-left">
-            <a class="uk-navbar-item uk-logo" href="#">Recipe Explorer</a>
-        </div>
-        <div class="uk-navbar-right">
-            <div class="uk-navbar-item">
-                <form class="uk-search uk-search-default" id="searchForm">
-                    <span uk-search-icon></span>
-                    <input class="uk-search-input" type="search" placeholder="Search recipes..." aria-label="Search" id="searchInput">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Recipe Explorer</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="d-flex ms-auto" id="searchForm">
+                    <input class="form-control me-2" type="search" placeholder="Search recipes..." aria-label="Search" id="searchInput">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
-            </div>
-            <ul class="uk-navbar-nav">
-                <li>
-                    <a href="#">Filter by Tag <span uk-icon="icon: chevron-down"></span></a>
-                    <div class="uk-navbar-dropdown" id="tagFilterOptionsContainer">
-                        <ul class="uk-nav uk-navbar-dropdown-nav" id="tagFilterOptions">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="tagFilterDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Filter by Tag
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="tagFilterDropdown" id="tagFilterOptions">
                             <!-- Tag options will be populated here -->
                         </ul>
-                    </div>
-                </li>
-                <li>
-                    <a href="#">Filter by Meal Type <span uk-icon="icon: chevron-down"></span></a>
-                    <div class="uk-navbar-dropdown" id="mealTypeFilterOptionsContainer">
-                        <ul class="uk-nav uk-navbar-dropdown-nav" id="mealTypeFilterOptions">
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="mealTypeFilterDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Filter by Meal Type
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="mealTypeFilterDropdown" id="mealTypeFilterOptions">
                             <!-- Meal type options will be populated here -->
                         </ul>
-                    </div>
-                </li>
-                <li>
-                    <div class="uk-navbar-item">
-                        <button class="uk-button uk-button-primary" id="addRecipeBtn" uk-toggle="target: #addEditRecipeModal">Add Recipe</button>
-                    </div>
-                </li>
-            </ul>
-            <a class="uk-navbar-toggle uk-hidden@m" uk-navbar-toggle-icon href="#" uk-toggle="target: #offcanvas-nav"></a>
+                    </li>
+                     <li class="nav-item">
+                        <button class="btn btn-primary ms-2" id="addRecipeBtn" data-bs-toggle="modal" data-bs-target="#addEditRecipeModal">Add Recipe</button>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <!-- Off-canvas navigation for mobile -->
-    <div id="offcanvas-nav" uk-offcanvas="overlay: true">
-        <div class="uk-offcanvas-bar">
-            <button class="uk-offcanvas-close" type="button" uk-close></button>
-            <form class="uk-search uk-search-default uk-width-1-1 uk-margin-bottom" id="searchFormMobile">
-                <span uk-search-icon></span>
-                <input class="uk-search-input" type="search" placeholder="Search recipes..." aria-label="Search" id="searchInputMobile">
-            </form>
-            <ul class="uk-nav uk-nav-default">
-                <li class="uk-parent">
-                    <a href="#">Filter by Tag <span uk-nav-parent-icon></span></a>
-                    <ul class="uk-nav-sub" id="tagFilterOptionsMobile">
-                        <!-- Tag options will be populated here by JS -->
-                    </ul>
-                </li>
-                <li class="uk-parent">
-                    <a href="#">Filter by Meal Type <span uk-nav-parent-icon></span></a>
-                    <ul class="uk-nav-sub" id="mealTypeFilterOptionsMobile">
-                        <!-- Meal type options will be populated here by JS -->
-                    </ul>
-                </li>
-                <li><button class="uk-button uk-button-primary uk-width-1-1" id="addRecipeBtnMobile" uk-toggle="target: #addEditRecipeModal">Add Recipe</button></li>
-            </ul>
-        </div>
-    </div>
-
     <!-- Main Content Area -->
-    <div class="uk-container uk-margin-top">
+    <div class="container mt-4">
         <!-- Sorting Controls -->
-        <div class="uk-grid-small uk-margin-bottom" uk-grid>
-            <div class="uk-width-1-2@s uk-width-1-3@m uk-width-1-4@l">
-                <label for="sortBySelect" class="uk-form-label">Sort By:</label>
-                <select class="uk-select" id="sortBySelect">
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label for="sortBySelect" class="form-label">Sort By:</label>
+                <select class="form-select" id="sortBySelect">
                     <option value="name">Name</option>
                     <option value="rating">Rating</option>
                     <option value="caloriesPerServing">Calories</option>
                 </select>
             </div>
-            <div class="uk-width-1-2@s uk-width-1-3@m">
-                <label for="sortOrderSelect" class="uk-form-label">Order:</label>
-                <select class="uk-select" id="sortOrderSelect">
+            <div class="col-md-4">
+                <label for="sortOrderSelect" class="form-label">Order:</label>
+                <select class="form-select" id="sortOrderSelect">
                     <option value="asc">Ascending</option>
                     <option value="desc">Descending</option>
                 </select>
@@ -98,138 +70,126 @@
         </div>
 
         <!-- Recipe Cards Grid -->
-        <div class="uk-grid-match uk-child-width-1-1 uk-child-width-1-2@s uk-child-width-1-3@m" uk-grid="masonry: true" id="recipeCardGrid">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="recipeCardGrid">
             <!-- Recipe cards will be populated here -->
         </div>
 
         <!-- Pagination Controls -->
-        <ul class="uk-pagination uk-flex-center uk-margin-medium-top" id="paginationControls">
-            <!-- Pagination items will be populated here -->
-        </ul>
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center" id="paginationControls">
+                <!-- Pagination items will be populated here -->
+            </ul>
+        </nav>
     </div>
 
     <!-- Recipe Detail Modal -->
-    <div id="recipeDetailModal" class="uk-flex-top" uk-modal>
-        <div class="uk-modal-dialog uk-margin-auto-vertical uk-width-3-4@m">
-            <button class="uk-modal-close-default" type="button" uk-close></button>
-            <div class="uk-modal-header">
-                <h2 class="uk-modal-title" id="recipeDetailModalLabel">Recipe Details</h2>
-            </div>
-            <div class="uk-modal-body" id="recipeDetailModalBody"> <!-- Content injected here -->
-                <!-- Recipe details will be populated here -->
-            </div>
-            <div class="uk-modal-footer uk-text-right">
-                <button class="uk-button uk-button-default uk-modal-close" type="button">Close</button>
-                <button class="uk-button uk-button-primary" id="editRecipeModalBtn" type="button">Edit</button>
-                <button class="uk-button uk-button-danger" id="deleteRecipeModalBtn" type="button">Delete</button>
+    <div class="modal fade" id="recipeDetailModal" tabindex="-1" aria-labelledby="recipeDetailModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="recipeDetailModalLabel">Recipe Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="recipeDetailModalBody">
+                    <!-- Recipe details will be populated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-warning" id="editRecipeModalBtn">Edit</button>
+                    <button type="button" class="btn btn-danger" id="deleteRecipeModalBtn">Delete</button>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- Add/Edit Recipe Modal -->
-    <div id="addEditRecipeModal" class="uk-flex-top" uk-modal>
-        <div class="uk-modal-dialog uk-margin-auto-vertical uk-width-2-3@m">
-            <button class="uk-modal-close-default" type="button" uk-close></button>
-            <div class="uk-modal-header">
-                <h2 class="uk-modal-title" id="addEditRecipeModalLabel">Add Recipe</h2>
+    <div class="modal fade" id="addEditRecipeModal" tabindex="-1" aria-labelledby="addEditRecipeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addEditRecipeModalLabel">Add Recipe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addEditRecipeForm">
+                        <input type="hidden" id="recipeId">
+                        <div class="mb-3">
+                            <label for="recipeName" class="form-label">Name</label>
+                            <input type="text" class="form-control" id="recipeName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeIngredients" class="form-label">Ingredients (comma-separated)</label>
+                            <textarea class="form-control" id="recipeIngredients" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeInstructions" class="form-label">Instructions (semicolon-separated steps)</label>
+                            <textarea class="form-control" id="recipeInstructions" rows="5" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeImage" class="form-label">Image URL</label>
+                            <input type="url" class="form-control" id="recipeImage">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="recipePrepTime" class="form-label">Prep Time (minutes)</label>
+                                <input type="number" class="form-control" id="recipePrepTime" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="recipeCookTime" class="form-label">Cook Time (minutes)</label>
+                                <input type="number" class="form-control" id="recipeCookTime" min="0">
+                            </div>
+                        </div>
+                         <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="recipeCuisine" class="form-label">Cuisine</label>
+                                <input type="text" class="form-control" id="recipeCuisine">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="recipeDifficulty" class="form-label">Difficulty</label>
+                                <select class="form-select" id="recipeDifficulty">
+                                    <option value="Easy">Easy</option>
+                                    <option value="Medium">Medium</option>
+                                    <option value="Hard">Hard</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeTags" class="form-label">Tags (comma-separated)</label>
+                            <input type="text" class="form-control" id="recipeTags">
+                        </div>
+                        <div class="mb-3">
+                            <label for="recipeMealType" class="form-label">Meal Type (comma-separated)</label>
+                            <input type="text" class="form-control" id="recipeMealType">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save Recipe</button>
+                    </form>
+                </div>
             </div>
-            <!-- The form itself will be the scrollable body -->
-            <form id="addEditRecipeForm" class="uk-form-stacked uk-modal-body">
-                <input type="hidden" id="recipeId">
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="recipeName">Name</label>
-                    <div class="uk-form-controls">
-                        <input class="uk-input" id="recipeName" type="text" required>
-                    </div>
-                </div>
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="recipeIngredients">Ingredients (comma-separated)</label>
-                    <div class="uk-form-controls">
-                        <textarea class="uk-textarea" id="recipeIngredients" rows="3" required></textarea>
-                    </div>
-                </div>
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="recipeInstructions">Instructions (semicolon-separated steps)</label>
-                    <div class="uk-form-controls">
-                        <textarea class="uk-textarea" id="recipeInstructions" rows="5" required></textarea>
-                    </div>
-                </div>
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="recipeImage">Image URL</label>
-                    <div class="uk-form-controls">
-                        <input class="uk-input" id="recipeImage" type="url">
-                    </div>
-                </div>
-                <div class="uk-grid-small" uk-grid>
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label" for="recipePrepTime">Prep Time (minutes)</label>
-                        <div class="uk-form-controls">
-                            <input class="uk-input" id="recipePrepTime" type="number" min="0">
-                        </div>
-                    </div>
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label" for="recipeCookTime">Cook Time (minutes)</label>
-                        <div class="uk-form-controls">
-                            <input class="uk-input" id="recipeCookTime" type="number" min="0">
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-grid-small" uk-grid>
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label" for="recipeCuisine">Cuisine</label>
-                        <div class="uk-form-controls">
-                            <input class="uk-input" id="recipeCuisine" type="text">
-                        </div>
-                    </div>
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label" for="recipeDifficulty">Difficulty</label>
-                        <div class="uk-form-controls">
-                            <select class="uk-select" id="recipeDifficulty">
-                                <option value="Easy">Easy</option>
-                                <option value="Medium">Medium</option>
-                                <option value="Hard">Hard</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="recipeTags">Tags (comma-separated)</label>
-                    <div class="uk-form-controls">
-                        <input class="uk-input" id="recipeTags" type="text">
-                    </div>
-                </div>
-                <div class="uk-margin">
-                    <label class="uk-form-label" for="recipeMealType">Meal Type (comma-separated)</label>
-                    <div class="uk-form-controls">
-                        <input class="uk-input" id="recipeMealType" type="text">
-                    </div>
-                </div>
-                <!-- Buttons are part of the form, so they will scroll -->
-                <div class="uk-margin uk-text-right">
-                    <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
-                    <button type="submit" class="uk-button uk-button-primary">Save Recipe</button>
-                </div>
-            </form>
-            <!-- No separate uk-modal-footer needed if buttons are part of the scrolling form body -->
         </div>
     </div>
 
-    <!-- Toast Notifications Container - UIkit handles this differently, usually appends to body or a specific uikit container -->
-    <!-- We will manage notifications via JS using UIkit.notification -->
+    <!-- Toast Notifications Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <!-- Toasts will be appended here -->
+    </div>
 
     <!-- Loading Spinner -->
-    <div id="loadingSpinnerModal" class="uk-flex-top" uk-modal="esc-close: false; bg-close: false;">
-        <div class="uk-modal-dialog uk-modal-body uk-width-auto uk-margin-auto-vertical uk-text-center">
-            <div uk-spinner="ratio: 2"></div>
-            <p>Loading...</p>
+    <div class="modal fade" id="loadingSpinnerModal" tabindex="-1" aria-labelledby="loadingSpinnerModalLabel" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background: transparent; border: none;">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- jQuery (already present, UIkit is compatible) -->
+    <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- UIkit JS -->
-    <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/uikit@3.17.11/dist/js/uikit-icons.min.js"></script>
+    <!-- Bootstrap JS Bundle (includes Popper) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/script.js"></script>
 </body>
 </html>
