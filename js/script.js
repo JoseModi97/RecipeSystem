@@ -97,7 +97,53 @@ function fetchAllRecipes(skip = 0, limit = RECIPES_PER_PAGE) {
 }
 
 // --- Filter Functions --- (Minified)
-async function populateFilterDropdowns(){try{const t=await fetch(`${API_BASE_URL}/tags`);if(!t.ok)throw new Error(`Tags API error: ${t.status}`);let e=await t.json();e=e.map(t=>(typeof t=="object"&&t.name)?t.name:String(t)),tagFilterOptions.empty(),tagFilterOptions.append('<li><a class="dropdown-item tag-filter-item" href="#" data-tag="">All Tags</a></li>'),e.forEach(t=>{const e=String(t).charAt(0).toUpperCase()+String(t).slice(1).toLowerCase();tagFilterOptions.append(`<li><a class="dropdown-item tag-filter-item" href="#" data-tag="${t}">${e}</a></li>`)});const a=await fetch(`${API_BASE_URL}/meal-types`);if(!a.ok)throw new Error(`Meal Types API error: ${a.status}`);let i=await a.json();i=i.map(t=>(typeof t=="object"&&t.name)?t.name:String(t)),mealTypeFilterOptions.empty(),mealTypeFilterOptions.append('<li><a class="dropdown-item meal-type-filter-item" href="#" data-mealtype="">All Meal Types</a></li>'),i.forEach(t=>{mealTypeFilterOptions.append(`<li><a class="dropdown-item meal-type-filter-item" href="#" data-mealtype="${t}">${t}</a></li>`)})}catch(t){console.error("Error populating filters:",t),showToast("Could not load filter options.","danger")}}function resetActiveFiltersAndSearch(t=null){"search"!==t&&searchInput.val(""),"tag"!==t&&($("#tagFilterDropdown").text("Filter by Tag"),tagFilterOptions.find(".active").removeClass("active")),"mealType"!==t&&($("#mealTypeFilterDropdown").text("Filter by Meal Type"),mealTypeFilterOptions.find(".active").removeClass("active"))}function handleTagFilterClick(t){t.preventDefault();const e=$(this).data("tag");currentPage=1,resetActiveFiltersAndSearch("tag"),$("#tagFilterDropdown").text(e?`Tag: ${$(this).text()}`:"Filter by Tag"),tagFilterOptions.find(".dropdown-item.active").removeClass("active"),$(this).addClass("active"),e?(currentApiCallState={type:"tag",query:e,params:{limit:RECIPES_PER_PAGE,skip:0}},fetchFromAPI(`tag/${e}`,{limit:RECIPES_PER_PAGE,skip:0},"GET",null,!1,!1,!0)):fetchAllRecipes(0,RECIPES_PER_PAGE)}function handleMealTypeFilterClick(t){t.preventDefault();const e=$(this).data("mealtype");currentPage=1,resetActiveFiltersAndSearch("mealType"),$("#mealTypeFilterDropdown").text(e?`Type: ${$(this).text()}`:"Filter by Meal Type"),mealTypeFilterOptions.find(".dropdown-item.active").removeClass("active"),$(this).addClass("active"),e?(currentApiCallState={type:"mealType",query:e,params:{limit:RECIPES_PER_PAGE,skip:0}},fetchFromAPI(`meal-type/${e}`,{limit:RECIPES_PER_PAGE,skip:0},"GET",null,!1,!1,!0)):fetchAllRecipes(0,RECIPES_PER_PAGE)}
+async function populateFilterDropdowns() {
+    try {
+        // Fetch tags (existing functionality)
+        const tagsResponse = await fetch(`${API_BASE_URL}/tags`);
+        if (!tagsResponse.ok) throw new Error(`Tags API error: ${tagsResponse.status}`);
+        let tagsData = await tagsResponse.json();
+        tagsData = tagsData.map(tag => (typeof tag === "object" && tag.name) ? tag.name : String(tag));
+        tagFilterOptions.empty();
+        tagFilterOptions.append('<li><a class="dropdown-item tag-filter-item" href="#" data-tag="">All Tags</a></li>');
+        tagsData.forEach(tag => {
+            const formattedTag = String(tag).charAt(0).toUpperCase() + String(tag).slice(1).toLowerCase();
+            tagFilterOptions.append(`<li><a class="dropdown-item tag-filter-item" href="#" data-tag="${tag}">${formattedTag}</a></li>`);
+        });
+
+        // Fetch all recipes to extract meal types
+        // Using limit=0 to fetch all recipes as per DummyJSON docs for other resources (assuming it works for recipes)
+        // If limit=0 doesn't work as expected, we might need to paginate through all recipes.
+        // For now, let's try with a high limit or what the API defaults to if limit=0 isn't supported for recipes.
+        // The API documentation says "By default you will get 30 items, use Limit and skip to paginate through all items."
+        // And "use limit=0 to get all items" for limit and skip section.
+        const recipesResponse = await fetch(`${API_BASE_URL}?limit=0`); // Attempt to get all recipes
+        if (!recipesResponse.ok) throw new Error(`Recipes API error for meal types: ${recipesResponse.status}`);
+        const recipesData = await recipesResponse.json();
+
+        let allMealTypes = new Set();
+        if (recipesData && recipesData.recipes) {
+            recipesData.recipes.forEach(recipe => {
+                if (recipe.mealType && Array.isArray(recipe.mealType)) {
+                    recipe.mealType.forEach(mt => allMealTypes.add(String(mt)));
+                }
+            });
+        }
+
+        const uniqueMealTypes = Array.from(allMealTypes).sort();
+
+        mealTypeFilterOptions.empty();
+        mealTypeFilterOptions.append('<li><a class="dropdown-item meal-type-filter-item" href="#" data-mealtype="">All Meal Types</a></li>');
+        uniqueMealTypes.forEach(mealType => {
+            mealTypeFilterOptions.append(`<li><a class="dropdown-item meal-type-filter-item" href="#" data-mealtype="${mealType}">${mealType}</a></li>`);
+        });
+
+    } catch (error) {
+        console.error("Error populating filters:", error);
+        showToast("Could not load filter options.", "danger");
+    }
+}
+function resetActiveFiltersAndSearch(t=null){"search"!==t&&searchInput.val(""),"tag"!==t&&($("#tagFilterDropdown").text("Filter by Tag"),tagFilterOptions.find(".active").removeClass("active")),"mealType"!==t&&($("#mealTypeFilterDropdown").text("Filter by Meal Type"),mealTypeFilterOptions.find(".active").removeClass("active"))}function handleTagFilterClick(t){t.preventDefault();const e=$(this).data("tag");currentPage=1,resetActiveFiltersAndSearch("tag"),$("#tagFilterDropdown").text(e?`Tag: ${$(this).text()}`:"Filter by Tag"),tagFilterOptions.find(".dropdown-item.active").removeClass("active"),$(this).addClass("active"),e?(currentApiCallState={type:"tag",query:e,params:{limit:RECIPES_PER_PAGE,skip:0}},fetchFromAPI(`tag/${e}`,{limit:RECIPES_PER_PAGE,skip:0},"GET",null,!1,!1,!0)):fetchAllRecipes(0,RECIPES_PER_PAGE)}function handleMealTypeFilterClick(t){t.preventDefault();const e=$(this).data("mealtype");currentPage=1,resetActiveFiltersAndSearch("mealType"),$("#mealTypeFilterDropdown").text(e?`Type: ${$(this).text()}`:"Filter by Meal Type"),mealTypeFilterOptions.find(".dropdown-item.active").removeClass("active"),$(this).addClass("active"),e?(currentApiCallState={type:"mealType",query:e,params:{limit:RECIPES_PER_PAGE,skip:0}},fetchFromAPI(`meal-type/${e}`,{limit:RECIPES_PER_PAGE,skip:0},"GET",null,!1,!1,!0)):fetchAllRecipes(0,RECIPES_PER_PAGE)}
 
 // --- Recipe Detail Functions --- (Minified)
 async function displayRecipeDetails(t){const e=await fetchFromAPI(t,{},"GET",null,!1,!0,!1);if(!e)return recipeDetailModalBody.html('<p class="text-center text-danger">Could not load recipe details.</p>'),void recipeDetailModal.show();recipeDetailModalLabel.text(e.name);let a='<ul class="list-unstyled">';(e.ingredients||[]).forEach(t=>{a+=`<li><i class="bi bi-check-circle-fill text-success me-2"></i>${t}</li>`}),a+="</ul>";let i="<ol>";(e.instructions||[]).forEach(t=>{i+=`<li class="mb-2">${t}</li>`}),i+="</ol>";let l=(e.tags||[]).map(t=>`<span class="badge bg-secondary me-1 mb-1">${t}</span>`).join(""),s=(e.mealType||[]).map(t=>`<span class="badge bg-info me-1 mb-1">${t}</span>`).join("");recipeDetailModalBody.html(`\n        <div class="row">\n            <div class="col-md-5 text-center mb-3 mb-md-0"><img src="${e.image}" alt="${e.name}" class="img-fluid rounded shadow-sm" style="max-height: 300px; object-fit: cover;"></div>\n            <div class="col-md-7"><h4>${e.name}</h4>\n                <p class="mb-1"><strong><i class="bi bi-geo-alt-fill text-primary"></i> Cuisine:</strong> ${e.cuisine}</p>\n                <p class="mb-1"><strong><i class="bi bi-award-fill text-warning"></i> Difficulty:</strong> ${e.difficulty}</p>\n                <p class="mb-1"><strong><i class="bi bi-star-fill text-warning"></i> Rating:</strong> ${e.rating?e.rating.toFixed(1):"N/A"} (${e.reviewCount||0} reviews)</p>\n                <p class="mb-1"><strong><i class="bi bi-fire text-danger"></i> Calories:</strong> ${e.caloriesPerServing} per serving</p>\n                <p class="mb-1"><strong><i class="bi bi-clock-fill text-info"></i> Prep Time:</strong> ${e.prepTimeMinutes} min</p>\n                <p class="mb-1"><strong><i class="bi bi-stopwatch-fill text-info"></i> Cook Time:</strong> ${e.cookTimeMinutes} min</p>\n                <p class="mb-1"><strong><i class="bi bi-people-fill text-secondary"></i> Servings:</strong> ${e.servings}</p></div></div><hr>\n        <h5><i class="bi bi-list-ul text-primary"></i> Ingredients</h5>${a}<hr>\n        <h5><i class="bi bi-card-checklist text-primary"></i> Instructions</h5>${i}<hr>\n        ${l?`<h6><i class="bi bi-tags-fill text-secondary"></i> Tags</h6><p>${l}</p>`:""}\n        ${s?`<h6><i class="bi bi-pie-chart-fill text-info"></i> Meal Types</h6><p>${s}</p>`:""}`),recipeDetailModalElement.dataset.recipeId=e.id,editRecipeModalBtn.data("id",e.id),deleteRecipeModalBtn.data("id",e.id),recipeDetailModal.show()}function handleViewRecipeClick(){$(this).data("id")&&displayRecipeDetails($(this).data("id"))}
