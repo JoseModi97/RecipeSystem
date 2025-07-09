@@ -1,6 +1,7 @@
 // Global variables
 const API_BASE_URL = 'https://dummyjson.com/recipes';
 const RECIPES_PER_PAGE = 30;
+const SKELETON_CARDS_COUNT = 9; // Number of skeleton cards to show
 let currentPage = 1;
 let totalRecipes = 0;
 let currentRecipes = []; // To store all fetched recipes
@@ -25,11 +26,43 @@ const addEditRecipeModalLabel = $('#addEditRecipeModalLabel');
 const addRecipeBtn = $('#addRecipeBtn');
 const editRecipeModalBtn = $('#editRecipeModalBtn');
 const deleteRecipeModalBtn = $('#deleteRecipeModalBtn');
-const loadingSpinnerModal = new bootstrap.Modal(document.getElementById('loadingSpinnerModal'));
+// const loadingSpinnerModal = new bootstrap.Modal(document.getElementById('loadingSpinnerModal')); // Old spinner
 
 // Utility Functions
-function showLoader() { loadingSpinnerModal.show(); }
-function hideLoader() { setTimeout(() => { loadingSpinnerModal.hide(); }, 250); }
+function createSkeletonCard() {
+    return `
+        <div class="col recipe-card-col skeleton-card">
+            <div class="card h-100 shadow-sm">
+                <div class="skeleton skeleton-image"></div>
+                <div class="card-body d-flex flex-column">
+                    <div class="skeleton skeleton-title"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="skeleton skeleton-text"></div>
+                    <div class="mt-auto">
+                        <div class="skeleton skeleton-button"></div>
+                    </div>
+                </div>
+            </div>
+        </div>`;
+}
+
+function showLoader() {
+    recipeCardGrid.empty(); // Clear previous content
+    for (let i = 0; i < SKELETON_CARDS_COUNT; i++) {
+        recipeCardGrid.append(createSkeletonCard());
+    }
+    // Ensure pagination is hidden if it was visible due to a previous error state with no results
+    paginationControls.addClass("d-none");
+}
+
+function hideLoader() {
+    // Skeleton cards are removed by displayRecipes, so this function is now a no-op.
+    // Kept for conceptual integrity or if direct hiding becomes necessary later.
+    // The old spinner hiding logic is removed:
+    // setTimeout(() => { loadingSpinnerModal.hide(); }, 250);
+}
+
 function showToast(message, type = 'success') {
     const toastId = `toast-${Date.now()}`;
     const toastHTML = `<div id="${toastId}" class="toast align-items-center text-white bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert" aria-live="assertive" aria-atomic="true"><div class="d-flex"><div class="toast-body">${message}</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button></div></div>`;
@@ -44,15 +77,29 @@ function createRecipeCard(recipe) {
     return `<div class="col recipe-card-col" data-recipe-id="${recipe.id}"><div class="card h-100 shadow-sm"><img src="${recipe.image}" class="card-img-top" alt="${recipe.name}" style="height: 200px; object-fit: cover;" loading="lazy"><div class="card-body d-flex flex-column"><h5 class="card-title">${recipe.name}</h5><p class="card-text mb-1"><small class="text-muted">Cuisine: ${recipe.cuisine}</small></p><p class="card-text mb-1"><small class="text-muted">Difficulty: ${recipe.difficulty}</small></p><p class="card-text mb-1"><small class="text-muted">Rating: ${recipe.rating ? recipe.rating.toFixed(1) : 'N/A'} <i class="bi bi-star-fill text-warning"></i> (${recipe.reviewCount || 0} reviews)</small></p><p class="card-text"><small class="text-muted">Calories: ${recipe.caloriesPerServing}</small></p><div class="mt-auto"><button class="btn btn-primary w-100 view-recipe-btn" data-id="${recipe.id}">View Recipe</button></div></div></div></div>`;
 }
 function displayRecipes(recipes) {
-    recipeCardGrid.empty();
-    if (!recipes || recipes.length === 0) { recipeCardGrid.html('<div class="col-12"><p class="text-center mt-5">No recipes found.</p></div>'); totalRecipes = 0; }
-    else { recipes.forEach(recipe => { recipeCardGrid.append(createRecipeCard(recipe)); }); }
-    updatePagination();
+    recipeCardGrid.empty(); // This will clear skeleton cards or previous recipes
+    if (!recipes || recipes.length === 0) {
+        recipeCardGrid.html('<div class="col-12"><p class="text-center mt-5">No recipes found.</p></div>');
+        totalRecipes = 0; // Ensure totalRecipes is updated for "no results"
+    } else {
+        recipes.forEach(recipe => { recipeCardGrid.append(createRecipeCard(recipe)); });
+    }
+    updatePagination(); // This will correctly show/hide pagination based on totalRecipes
 }
 
 // --- API Fetching Functions ---
 async function fetchFromAPI(endpoint, queryParams = {}, method = 'GET', body = null, isSearch = false, isSingleRecipe = false, isFilter = false) {
-    showLoader();
+    // For single recipe fetch (view details, edit prep), we don't want to show grid skeleton loaders.
+    // The modal for details has its own loading state if needed, or content appears quickly.
+    // Add/Edit/Delete operations also don't need grid skeletons.
+    if (!isSingleRecipe && method === 'GET' && (endpoint === API_BASE_URL || endpoint.startsWith('tag/') || endpoint.startsWith('meal-type/') || isSearch)) {
+        showLoader();
+    } else if (method !== 'GET' && !isSingleRecipe) { // POST (add) might show a loader, but not grid skeleton
+        // For now, non-GET, non-single recipe calls (like POST to /add) won't use the grid skeleton loader.
+        // If a specific loader is needed for these, it would be a different implementation (e.g., button spinner).
+    }
+
+
     let url;
     const options = { method: method, headers: { 'Content-Type': 'application/json' } };
     if (body && (method === 'POST' || method === 'PUT')) options.body = JSON.stringify(body);
@@ -86,9 +133,21 @@ async function fetchFromAPI(endpoint, queryParams = {}, method = 'GET', body = n
         }
     } catch (error) {
         console.error('Error in API call:', error); showToast(`API Error: ${error.message}`, 'danger');
-        if (!isSingleRecipe && method === 'GET' && method !== 'DELETE') { recipeCardGrid.html('<div class="col-12"><p class="text-center text-danger mt-5">Could not load recipes.</p></div>'); totalRecipes = 0; displayRecipes([]); }
+        if (!isSingleRecipe && method === 'GET' && method !== 'DELETE') {
+            // Ensure skeleton loaders are cleared on error and an error message is shown.
+            // displayRecipes([]) will handle clearing the grid and showing "No recipes found."
+            // or we can set a specific error message.
+            recipeCardGrid.html('<div class="col-12"><p class="text-center text-danger mt-5">Could not load recipes.</p></div>');
+            totalRecipes = 0;
+            updatePagination(); // Hide pagination on error
+        }
         return null;
-    } finally { hideLoader(); }
+    } finally {
+        // hideLoader() is now a no-op, skeleton is cleared by displayRecipes or error message.
+        // Only call hideLoader if it were a different type of loader (e.g. a global spinner, not grid items)
+        // For grid skeletons, the content itself (or error message) replaces them.
+        // No explicit hideLoader() call needed here if showLoader populated the grid.
+    }
 }
 function fetchAllRecipes(skip = 0, limit = RECIPES_PER_PAGE) {
     const queryParams = { limit: limit, skip: skip, sortBy: sortBySelect.val(), order: sortOrderSelect.val() };
