@@ -56,7 +56,7 @@ function createRecipeCard(recipe) {
                 <img src="${recipe.image}" alt="${recipe.name}" style="height: 200px; width:100%; object-fit: cover;" loading="lazy">
             </div>
             <div class="uk-card-body uk-flex uk-flex-column">
-                <h3 class="uk-card-title uk-margin-remove-bottom">${recipe.name}</h3>
+                <h3 class="uk-card-title uk-margin-remove-bottom uk-text-truncate">${recipe.name}</h3>
                 <p class="uk-text-small uk-margin-small-top uk-margin-remove-bottom">Cuisine: ${recipe.cuisine}</p>
                 <p class="uk-text-small uk-margin-small-top uk-margin-remove-bottom">Difficulty: ${recipe.difficulty}</p>
                 <p class="uk-text-small uk-margin-small-top uk-margin-remove-bottom">Rating: ${recipe.rating ? recipe.rating.toFixed(1) : 'N/A'} <span uk-icon="icon: star; ratio: 0.8" class="uk-text-warning"></span> (${recipe.reviewCount || 0} reviews)</p>
