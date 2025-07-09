@@ -1,4 +1,33 @@
-/* Custom styles will go here */
+/* css/style.css */
 body {
     font-family: sans-serif;
+    /* background-color: #f8f9fa; */ /* Example: You might want to set a background for the page with UIkit */
 }
+
+/* Ensure recipe card images have a consistent height and cover the area */
+.uk-card-media-top img {
+    height: 200px;
+    object-fit: cover;
+    width: 100%;
+}
+
+/* Add any additional UIkit specific overrides or new custom styles below if needed. */
+
+/* Example: If you want to customize UIkit's primary button further */
+/*
+.uk-button-primary {
+    background-color: #0056b3; // Your custom color
+    color: #ffffff;
+}
+.uk-button-primary:hover {
+    background-color: #004494; // Darker shade for hover
+}
+*/
+
+/* Example: Customizing UIkit card appearance */
+/*
+.uk-card-default {
+    border-radius: 0px; // If you prefer sharper edges than UIkit's default
+    box-shadow: uk-box-shadow-medium; // Using a different default shadow
+}
+*/
